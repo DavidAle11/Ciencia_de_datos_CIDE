@@ -1,0 +1,395 @@
+<h1>Analizando tweets</h1>
+<p>Fecha límite: domingo 14 de marzo a las 11:59 pm.</p>
+<p>El propósito de esta tarea es darte la oportunidad de practicar</p>
+<ol>
+<li>El uso de diccionarios para representar datos y como un mecanismo para asignar claves a valores que cambian con el tiempo,</li>
+<li>Usar funciones para evitar código repetido,</li>
+<li>Estructurar una tarea en piezas lógicas y fáciles de probar, y</li>
+<li>Leer la documentación para las funciones de la biblioteca.</li>
+</ol>
+<h2>Introducción</h2>
+<p>Para esta tarea, analizaremos los tweets que se han hecho en las últimas semanas respecto al NAICM y la controversia por la Auditoría de la ASF.</p>
+<h3>Empezando</h3>
+<p>Antes de comenzar a trabajar en las tareas de la tarea, asegurate de haber descargado el archivo twitter_NAICM_full.json, el archivo util.py que contienen los datos y funciones de ayuda para correr el código, y el archivo analysis.py que contiene las funciones a modificar. Deberás entregar el archivo de analysis.py con las funciones, aunque puedes usar un notebook para hacer pruebas si así lo consideras pertinente.
+Debes guardar todos los archivos en una sola carpeta para asegurarte que el código funciona como esperararías. En esta tarea, puede asumir que la entrada pasada a sus funciones tiene el formato correcto. No puede alterar ninguna de los inputs que se pasan a las funciones de util.py y analysis.py. En general, es de mal estilo modificar una estructura de datos pasada como entrada a una función, a menos que ese sea el propósito explícito de la función. Si alguien llama a su función, es posible que tenga otros usos para los datos y no debería sorprenderse con cambios inesperados.</p>
+<h3>Parte 1: Algoritmos básicos</h3>
+<p>Los algoritmos para contar y clasificar de manera eficiente tokens distintos , o valores únicos, se utilizan ampliamente en el análisis de datos. Por ejemplo, es posible que deseemos encontrar la palabra clave más utilizada en un documento o los 10 enlaces más populares en los que se hace clic en un sitio web. En la Parte 1, implementará dos de estos algoritmos: <code>find_top_k</code> y <code>find_min_count</code>. También implementará un algoritmo para encontrar los tokens más destacados (es decir, los más importantes o notables) de un documento en el contexto de una colección de documentos.</p>
+<p>En esta parte, agregará código a analysis.py para implementar los algoritmos descritos en las siguientes subsecciones.</p>
+<h4>Paso 1.1: Contar tokens distintos</h4>
+<p>El primer paso es escribir una función auxiliar count_tokens, que cuente distintos tokens. Esta función toma como entrada una lista de tokens (en nuestro ejemplo son string, pero pueden ser de cualquier tipo inmutable) y devuelve un diccionario que asigna tokens a recuentos.</p>
+<p>Por ejemplo, si tenemos una lista:</p>
+<p><code>['A', 'B', 'C', 'A']</code></p>
+<p>la función debería producir (el orden exacto de los pares clave-valor en el diccionario no es importante):</p>
+<p><code>{'A': 2, 'B': 1, 'C': 1}</code></p>
+<p>Notas:</p>
+<ol>
+<li>
+<p>No utilice bibliotecas de Python distintas de las que ya se han importado. (Por ejemplo, no utilice collections.Counter.)</p>
+</li>
+<li>
+<p>Si usa el list.count() método de Python, su solución será ineficiente y no recibirá crédito por esta tarea.</p>
+</li>
+</ol>
+<h4>Paso 1.2: Top K</h4>
+<p>Escribirá el algoritmo find_top_k, que toma una lista de tokens y un entero k no negativo , y devuelve una lista de los tokens k que ocurren con mayor frecuencia en la lista. El resultado debe clasificarse en orden descendente de frecuencia de token.</p>
+<p>A continuación, se muestra un ejemplo de uso de esta función:</p>
+<pre><code>In [4]: l = ['D', 'B', 'C', 'D', 'D', 'B', 'D', 'C', 'D', 'A']
+
+In [5]: find_top_k(l, 2)
+Out[5]: ['D','B
+</code></pre>
+<p>Para hacer este cálculo, necesitará:</p>
+<ol>
+<li>
+<p>Contar el número de veces que aparece cada ficha,</p>
+</li>
+<li>
+<p>Convertir esos datos en una lista de (token, recuento) tuplas</p>
+</li>
+<li>
+<p>Ordenar la lista resultante en orden decreciente por recuento.</p>
+</li>
+<li>
+<p>Extraer los tokens K que ocurrieron con más frecuencia.</p>
+</li>
+</ol>
+<p>La función sort de Python ordena los pares utilizando el primer valor como clave principal y el segundo valor como clave secundaria (para romper los lazos) y, por lo tanto, no es adecuada para esta tarea. En su lugar, necesita una función de sorting que utilice el segundo valor como llave principal y el primer valor para romper los empates. Hemos proporcionado tal función (puede usar la tuya):</p>
+<pre><code>sorted(list(ngram_dict.items()), key=lambda x: x[1], reverse=True)
+</code></pre>
+<h4>Paso 1.3: Número mínimo de ocurrencias</h4>
+<p>Escribirás el algoritmo find_min_count, que calcula un conjunto de tokens en una lista que ocurren al menos un número mínimo de veces especificado.</p>
+<p>A continuación, se muestra un ejemplo de uso de esta función:</p>
+<pre><code>In [6]: l = ['D', 'B', 'C', 'D', 'D', 'B', 'D', 'C', 'D', 'A']
+
+In [7]: basic_algorithms.find_min_count(l, 2)
+Out[7]: {'D', 'B', 'C'}
+</code></pre>
+<p>Recuerde que los conjuntos no están ordenados, por lo que el resultado de esta llamada podría haber sido fácilmente .</p>
+<p><code>{'B', 'C', 'D'}</code></p>
+<h3>Tokens salientes</h3>
+<p>Es posible que los tokens más frecuentes de la lista no sean los más destacados. Por ejemplo, si la lista contiene palabras de un documento en inglés, el hecho de que las palabras “a”, “an” y “the” aparezcan con frecuencia no es sorprendente.</p>
+<p>En procesamiento de textos, el término frecuencia-frecuencia inversa de documentos (también conocido como tf-idf ) es una estadística diseñada para reflejar la importancia de una palabra para un documento en una colección o corpus y se utiliza a menudo como factor de ponderación en la recuperación de información y minería de texto. Una palabra o término se considera relevante para un documento en particular si aparece con frecuencia en ese documento, pero no en el corpus del documento en general.</p>
+<p>Definiciones</p>
+<p>Término frecuencia - frecuencia inversa de documentos se define como:</p>
+<p><img src="https://latex.codecogs.com/gif.latex?tf_idf(t,&amp;space;d,&amp;space;D)&amp;space;=&amp;space;tf(t,&amp;space;d)&amp;space;\cdot&amp;space;idf(t,&amp;space;D)" title="tf_idf(t, d, D) = tf(t, d) \cdot idf(t, D)"></p>
+<p>dónde t es un término, d es un documento (colección de términos), D es una colección de documentos, td y idf se definen a continuación.</p>
+<p>Hay varias variantes de frecuencia de ambos términos (tf) y frecuencia inversa del documento (idf) que se puede utilizar para calcular. Usaremos la frecuencia aumentada como nuestra medida de la frecuencia de los términos para evitar el sesgo hacia documentos más largos, y usaremos la frecuencia inversa básica de los documentos.</p>
+<p>La frecuencia aumentada de un término en un documento. Se define como</p>
+<p><img src="https://latex.codecogs.com/gif.latex?tf(t,&amp;space;d)&amp;space;=&amp;space;0.5&amp;space;+&amp;space;0.5&amp;space;\cdot&amp;space;\left&amp;space;(&amp;space;\frac{f_{t,d}}{\max(\{f_{t^\prime,d}:&amp;space;t^\prime&amp;space;\in&amp;space;d\})}&amp;space;\right&amp;space;)" title="tf(t, d) = 0.5 + 0.5 \cdot \left ( \frac{f_{t,d}}{\max(\{f_{t^\prime,d}: t^\prime \in d\})} \right )"></p>
+<p>dónde <img src="https://latex.codecogs.com/gif.latex?f_{t,d}" title="f_{t,d}"> es el número de veces que el término  aparece en el documento .</p>
+<p>La frecuencia básica de documento inverso de un término en una colección de documentos  Se define como</p>
+<p><img src="https://latex.codecogs.com/gif.latex?idf(t,&amp;space;D)&amp;space;=&amp;space;\log&amp;space;\left&amp;space;(&amp;space;\frac{N}{\lvert&amp;space;\{d&amp;space;\in&amp;space;D&amp;space;:&amp;space;t&amp;space;\in&amp;space;d\}&amp;space;\rvert}&amp;space;\right&amp;space;)" title="idf(t, D) = \log \left ( \frac{N}{\lvert \{d \in D : t \in d\} \rvert} \right )"></p>
+<p>dónde N es el número de documentos en la colección de documentos D y donde <img src="https://latex.codecogs.com/gif.latex?{\lvert&amp;space;\{d&amp;space;\in&amp;space;D&amp;space;:&amp;space;t&amp;space;\in&amp;space;d\}&amp;space;\rvert}" title="{\lvert \{d \in D : t \in d\} \rvert}">  es el número de documentos en los que ocurre el término t. Utilice el log natural ( math.log) en su cálculo de idf.</p>
+<p>Dado un umbral , el conjunto de palabras destacadas de un documento  en una colección de documentos  Se define como:</p>
+<p><img src="https://latex.codecogs.com/gif.latex?salient(d,&amp;space;D,&amp;space;T)&amp;space;=&amp;space;\{&amp;space;t&amp;space;:&amp;space;t&amp;space;\in&amp;space;d\,&amp;space;\rm{and}&amp;space;,&amp;space;tfidf(t,&amp;space;d,&amp;space;D)&amp;space;>&amp;space;T&amp;space;\}" title="salient(d, D, T) = \{ t : t \in d\, \rm{and} , tfidf(t, d, D) > T \}"></p>
+<p>Ejemplo</p>
+<p>En esta sección, trabajaremos en el cálculo de los tokens destacados para cada documento en una colección de documentos de muestra. Aquí está la colección de muestra:</p>
+<pre><code>  [['D', 'B', 'D', 'C', 'D', 'C', 'C'],
+   ['D', 'A', 'A'],
+   ['D', 'B'],
+   []]
+</code></pre>
+<p>Estos son los valores de frecuencia de términos aumentados para cada documento:</p>
+<pre><code>  Document: ['D', 'B', 'D', 'C', 'D', 'C', 'C']
+  Token: TF
+    B:  0.6666666666666666
+    C:  1.0
+    D:  1.0
+
+  Document: ['D', 'A', 'A']
+  Token: TF
+    A:  1.0
+    D:  0.75
+
+  Document: ['D', 'B']
+  Token: TF
+    B:  1.0
+    D:  1.0
+
+  Document: []
+</code></pre>
+<p>No hay valores de frecuencia de términos aumentados para el último documento porque está vacío.</p>
+<p>Estos son los valores de frecuencia de documentos inversos para la colección de documentos:</p>
+<pre><code>  Token: IDF:
+    A: 1.3862943611198906
+    B: 0.6931471805599453
+    C: 1.3862943611198906
+    D: 0.28768207245178085
+</code></pre>
+<p>Aquí está el cálculo de prominencia para cada documento usando un umbral de 0.4.</p>
+<pre><code>  Document: ['D', 'B', 'D', 'C', 'D', 'C', 'C']
+  Token: The token is salient (TF_IDF)
+    B: True (0.46209812037329684)
+    C: True (1.3862943611198906)
+    D: False (0.28768207245178085)
+  Salient tokens: {'B', 'C'}
+
+  Document: ['D', 'A', 'A']
+  Token: The token is salient (TF_IDF)
+    A: True (1.3862943611198906)
+    D: False (0.21576155433883565)
+  Salient tokens: {'A'}
+
+  Document: ['D', 'B']
+  Token: The token is salient (TF_IDF)
+    B: True (0.6931471805599453)
+    D: False (0.28768207245178085)
+  Salient tokens: {'B'}
+
+  Document: []
+  Salient tokens: set()
+</code></pre>
+<p>Tenga en cuenta que el documento vacío no tiene tokens destacados.</p>
+<p>Finalmente, el resultado de calcular los tokens destacados para los documentos en la colección de documentos es:</p>
+<pre><code>    [{'B', 'C'}, {'A'}, {'B'}, set()]
+</code></pre>
+<h4>Paso 1.4: Calcular tokens destacados</h4>
+<p>En esta tarea, escribirá el algoritmo find_salient, que toma una colección de documentos ( docs) y un umbral de punto flotante ( threshold) y encuentra el conjunto de palabras destacadas para cada documento (como se define en la sección anterior). El resultado de la función será una lista de conjuntos, con un conjunto por documento.</p>
+<p>Debe pensar detenidamente cómo organizar el código para implementar este algoritmo. No pongan todo el código para esta tarea en una sola función.</p>
+<p>Algunas cosas para tener en cuenta:</p>
+<ol>
+<li>
+<p>Necesitará una estructura de datos intermedia para realizar un seguimiento de las frecuencias de documentos inversas para las palabras en la colección de documentos.</p>
+</li>
+<li>
+<p>Puede resultarle útil calcular una estructura de datos con el término frecuencias para las palabras de un documento, pero no es estrictamente necesario.</p>
+</li>
+<li>
+<p>Recuerde que el conjunto de palabras destacadas de un documento vacío es solo el conjunto vacío.</p>
+</li>
+<li>
+<p>Probar sus funciones intermedias (en notebook) a medida que avanza hará que sea más fácil completar esta tarea con éxito.</p>
+</li>
+</ol>
+<h3>Analizando Tweets</h3>
+<p>Ahora que ha implementado los algoritmos básicos, puede comenzar a analizar los feeds de Twitter. Para el resto de las tareas, modifique el código analysis.py.</p>
+<p>Si bien proporcionamos encabezados de función para cada una de las tareas requeridas, la estructura del resto del código depende de usted. Algunas tareas se pueden realizar limpiamente con una función, otras no. Esperamos que busque subtareas comunes para abstraerlas en funciones y esperamos que reutilice las funciones completadas anteriormente. Este proceso de descomposición de funciones y reutilización cuidadosa de funciones es una de las claves para escribir código limpio. Puede colocar sus funciones auxiliares en cualquier lugar del archivo que tenga sentido para usted.</p>
+<h4>Datos</h4>
+<p>Twitter nos permite buscar tweets con propiedades particulares, por ejemplo, de un usuario en particular, que contienen términos específicos y dentro de un rango de fechas determinado. Hay varias bibliotecas de Python que simplifican el proceso de uso de esta función de Twitter. Se utilizó la biblioteca Tweepy para recoger tweets sobre el NAICM, y almacenar los datos resultantes en archivos JSON.</p>
+<h4>Representando tweets</h4>
+<p>Un solo tweet está representado por un diccionario que contiene mucha información: tiempo de creación, hashtags utilizados, usuarios mencionados, texto del tweet, etc. Por ejemplo, aquí hay un tweet enviado por @UKLabour:</p>
+<pre><code>RT @MXvsCORRUPCION: ¿Qué sabemos del costo de cancelar el Nuevo Aeropuerto en Texcoco? ¿Qué ganamos los mexicanos con esta decisión? Aquí @…
+</code></pre>
+<p>y aquí hay una versión abreviada del correspondiente diccionario de tweets que incluye algunos de los más de 20 pares clave / valor:</p>
+<pre><code>{'contributors': None,
+ 'coordinates': None,
+ 'created_at': 'Thu Feb 25 23:18:11 +0000 2021',
+ 'entities': {'hashtags': [],
+  'symbols': [],
+  'urls': [],
+  'user_mentions': [{'id': 707633643150135296,
+    'id_str': '707633643150135296',
+    'indices': [3, 18],
+    'name': 'MXvsCORRUPCIÓN',
+    'screen_name': 'MXvsCORRUPCION'}]},
+ 'favorite_count': 0,
+ 'favorited': False,
+ 'geo': None,
+ 'id': 1365078669014822915,
+ 'retweet_count': 64,
+ 'retweeted': False,
+ 'retweeted_status': {'contributors': None,
+  'coordinates': None,
+  'created_at': 'Thu Feb 25 23:15:14 +0000 2021',
+  'entities': {'hashtags': [],
+   'symbols': [],
+   'urls': [{'display_url': 'twitter.com/i/web/status/1…',
+     'expanded_url': 'https://twitter.com/i/web/status/1365077926190972937',
+     'indices': [117, 140],
+     'url': 'https://t.co/PlWXrOHQp9'}],
+   'user_mentions': []},
+  'favorite_count': 125,
+  'favorited': False,
+  'geo': None,
+  'source': '&lt;a href="https://mobile.twitter.com" rel="nofollow"&gt;Twitter Web App&lt;/a&gt;',
+  'text': '¿Qué sabemos del costo de cancelar el Nuevo Aeropuerto en Texcoco? ¿Qué ganamos los mexicanos con esta decisión? Aq… https://t.co/PlWXrOHQp9',
+  'truncated': True,
+  'user': {'contributors_enabled': False,
+   'created_at': 'Wed Mar 09 18:26:22 +0000 2016',
+   'default_profile': False,
+   'default_profile_image': False,
+   'description': 'Analizamos la corrupción, hacemos periodismo, buscamos justicia, movilizamos socialmente y conversamos.',
+   'entities': {'description': {'urls': []},
+ 'text': 'RT @MXvsCORRUPCION: ¿Qué sabemos del costo de cancelar el Nuevo Aeropuerto en Texcoco? ¿Qué ganamos los mexicanos con esta decisión? Aquí @…',
+ 'truncated': False}
+</code></pre>
+<p>En conjunto, los hashtags, los símbolos, las menciones de usuarios y las URL se denominan entidades . Se puede acceder a estas entidades a través de la "entities"clave en el diccionario del tweet. El valor asociado a la clave "entities"es en sí mismo un diccionario que mapea claves que representan los tipos de entidad ( "hashtags", "symbols", "urls", "user_mentions") las listas de entidades de ese tipo. En general, la estructura de datos de las entidades tiene la forma:</p>
+<pre><code>'entities': {'key1': [{'subkey1': value11, 'subkey2': value21},
+                      {'subkey1': value12, 'subkey2': value22},
+                      ...],
+             'key2': [{'subkey3': value31, 'subkey4': value41},
+                      {'subkey3': value32, 'subkey4': value42},
+                     ...],
+             ...}
+</code></pre>
+<p>Por ejemplo, aquí hay un subconjunto de las entidades del tweet de muestra:</p>
+<pre><code>{'hashtags': [{'indices': [94, 100], 'text': 'NAICM'}],
+ 'symbols': [],
+ 'urls': [],
+ 'user_mentions': [{'id': 114900050,
+   'id_str': '114900050',
+   'indices': [3, 16],
+   'name': 'Mario Riestra Piña',
+   'screen_name': 'marioriestra'}]}
+</code></pre>
+<p>Cada entidad individual se representa con un diccionario, cuya forma depende del tipo de entidad. Por ejemplo, un hashtag incluirá información sobre el hashtag e indices dónde ocurrió en el tweet:</p>
+<pre><code>{'indices': [62, 74], 'text': 'GetInvolved'}
+</code></pre>
+<h3>Explorando los datos</h3>
+<p>Para simplificar el proceso de exploración de datos y pruebas, hemos proporcionado un código para cargar los tweets por usted. Aquí lo tienes:</p>
+<pre><code>import json
+
+with open("twitter_NAICM_full.json", "r+") as jsonFile:
+    NAICM = json.load(jsonFile)
+    
+# sample tweet 
+tweet0 = NAICM[0]
+</code></pre>
+<p>Le recomendamos que juegue con un par de diccionarios de tweets para familiarizarse con cómo acceder a la información en la estructura de datos antes de pasar a la siguiente tarea.</p>
+<h3>Parte 2: Encontrar entidades que ocurren comúnmente</h3>
+<h5>Parámetros comunes para la Parte 2</h5>
+<p>Las siguientes dos actividades utilizarán dos de los mismos parámetros. Para evitar repeticiones posteriores, las describimos aquí:</p>
+<ul>
+<li>
+<p>tweets es una lista de diccionarios que representan tweets.</p>
+</li>
+<li>
+<p>entity_desc es una tupla con tres valores: el primero es el tipo de entidad de interés (la clave), el segundo es la información de interés para ese tipo de entidad (la subclave) y el tercero es un booleano que indica si los valores diferencia mayúsculas y minúsculas . Por ejemplo, usamos la tupla para describir los hashtags, porque es la clave para extraer los hashtags del diccionario de entidades, es la subclave para extraer el texto del hashtag del diccionario de entidades y, para nuestros propósitos, usualmente trataremos hashtags que no distinguen entre mayúsculas y minúsculas. Por ejemplo, al trabajar con hashtags trataremos de ser iguales a . Por otro lado, las URL distinguen entre mayúsculas y minúsculas, por lo que las usaríamos como descripción de entidad para las URL.("hashtags", "text", False)"hashtags""text""#bbcqt""#BBCQT"("urls", "url", True)</p>
+</li>
+</ul>
+<p>(Encontrará que el método lower de string es útil para manejar entidades que no distinguen entre mayúsculas y minúsculas).</p>
+<h4>Paso 2.1: Principales entidades K</h4>
+<p>Para el paso 2.1, escribirás una función que encuentre las k entidades más comunes en una lista de tweets usando el algoritmo que escribiste en analysis.py. Debes completar la siguiente función:</p>
+<pre><code>def find_top_k_entities(tweets, entity_desc, k):
+</code></pre>
+<p>Los dos primeros parámetros son los descritos anteriormente y k es un número entero. Esta función, que está en analysis.py, debería devolver una lista de las kentidades más comunes. Como en la Tarea 1.2, la entidad más común debe ser la primera, la siguiente entidad más común debe ser la segunda, etc.</p>
+<p>Aquí hay una llamada de muestra:</p>
+<pre><code>In [13]: find_top_k_entities(NAICM[:50], ("hashtags", "text"), 3)
+Out[13]: ['asf', 'regeneraciónmx', 'naicm']
+</code></pre>
+<h4>Paso 2.2: Número mínimo de ocurrencias</h4>
+<p>Para la Tarea 2.2, encontrará todas las entidades que aparecen un número mínimo de veces utilizando el min_count que escribió anteriormente. Debes completar la función:</p>
+<pre><code>def find_min_count_entities(tweets, entity_desc, min_count):
+</code></pre>
+<p>donde los dos primeros parámetros son los descritos anteriormente y min_count es un número entero que especifica el número mínimo de veces que debe ocurrir una entidad para ser incluida en el resultado. Esta función debería devolver un set de entidades ocurridas al menos min_count veces.</p>
+<p>Aquí hay un ejemplo de uso de esta función usando los primeros 500 tweets:</p>
+<pre><code>In [14]:find_min_count_entities(NAICM[:500], ("user_mentions", "name"), 10)
+Out[14]: {'arturo herrera gutiérrez',
+ 'francisco jimenez #vxm',
+ 'adriana h',
+ 'pablo piña 🇲🇽 cdmx',
+ 'eric blair',
+ 'gabs ®... ℛℯ𝓃𝒶𝒸𝒾𝒹𝒶 ♔',
+ 'carlos loret de mola',
+ 'esmeralda riverón',
+ 'rochamonero',
+ 'latinus'}
+</code></pre>
+<h3>Parte 3: Analizando N-gramos</h3>
+<p>¿Qué conocimientos adicionales podríamos obtener al analizar palabras y secuencias de palabras?</p>
+<p>En esta parte, aplicará los tres algoritmos descritos anteriormente a secuencias contiguas de palabras, que se conocen como n-gramas . Antes de aplicar estos algoritmos a los tweets de un candidato, procesará previamente los tweets para revelar palabras útiles y luego extraerá los n-gramas. Su solución debe usar funciones auxiliares para evitar código duplicado.</p>
+<p>Hemos proporcionado tres funciones que ayudan a procesar y limpiar texto</p>
+<pre><code>import nltk
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+stopwords = stopwords.words("spanish")
+stopwords += ["rt", "https", "t", "co"]
+
+with open("twitter_NAICM_full.json", "r+") as jsonFile:
+    NAICM = json.load(jsonFile)
+
+tweet_clean = remove_hashtags(NAICM[0]["text"])
+tweet_text = eliminar_nooalfanum(tweet_clean)
+tweet_final = quitar_palabrasrep(tweet_text , stopwords)
+</code></pre>
+<p>Este código te arrojará una lista</p>
+<pre><code>['sabemos',
+ 'costo',
+ 'cancelar',
+ 'nuevo',
+ 'aeropuerto',
+ 'texcoco',
+ 'ganamos',
+ 'mexicanos',
+ 'decisión',
+ 'aquí',
+ '']
+</code></pre>
+<h4>Representar N-gramos</h4>
+<p>Su código debe calcular los n-gramas de un tweet después de preprocesar el texto abreviado del tweet. Estos n-gramas deben representarse como tuplas de cadenas. Considere la siguiente lista (que proviene del procesamiento previo):</p>
+<pre><code>['sabemos',
+ 'costo',
+ 'cancelar',
+ 'nuevo',
+ 'aeropuerto',
+ 'texcoco',
+ 'ganamos',
+ 'mexicanos',
+ 'decisión',
+ 'aquí',
+ '']
+</code></pre>
+<p>Tomando  produciría los siguientes bi-gramos (2 gramos):</p>
+<pre><code>[('sabemos', 'costo'),
+ ('costo', 'cancelar'),
+ ('cancelar', 'nuevo'),
+ ('nuevo', 'aeropuerto'),
+ ('aeropuerto', 'texcoco'),
+ ('texcoco', 'ganamos'),
+ ('ganamos', 'mexicanos'),
+ ('mexicanos', 'decisión'),
+ ('decisión', 'aquí'),
+ ('aquí', '')]
+</code></pre>
+<p>Notas</p>
+<p>El n-grama no "regresa" al principio. Es decir, la última palabra del tweet y la primera palabra del tweet no comprenden un n-gram(por lo que no se incluye).('now', 'things')</p>
+<p>Usted debe no combinar palabras de diferentes tuits en un sola n-gram.</p>
+<p>Parámetros comunes para la Parte 3
+El resto de pasos tienen tres parámetros en común:</p>
+<p>tweets una lista de diccionarios que representan tweets</p>
+<p>n es el número de palabras en un n-grama.</p>
+<p>case_sensitive un booleano, es decir, True si la tarea distingue entre mayúsculas y minúsculas.</p>
+<h4>Paso 3.1: Top K n-gramas</h4>
+<p>Aplicará su find_top_kfunción escrita anteriormente para encontrar los n-gramas más comunes. Tu tarea es implementar la función:</p>
+<p>def find_top_k_ngrams(tweets, n, case_sensitive, k):</p>
+<p>donde los primeros tres parámetros son los descritos anteriormente y k es un número entero. Esta función debería devolver una lista de los -gramas kmás comunes n. Como en la Tarea 1.2, el n-grama más común debe ir primero, seguido del segundo más común, etc.</p>
+<p>He aquí un ejemplo de uso de esta:</p>
+<pre><code>In [16]: find_top_k_ngrams(NAICM[:10000], 3, 10)
+Out[16]: ['75 ciento reportado',
+ 'menos 75 ciento',
+ 'primer análisis menos',
+ 'análisis menos 75',
+ 'revisamos reporte asf',
+ 'asf primer análisis',
+ 'reporte asf primer',
+ 'ciento reportado respecto',
+ 'reportado respecto can',
+ 'respecto can ']
+</code></pre>
+<h3>Paso 3.2: N-gramas destacados</h3>
+<p>Finalmente, usará su find_salient de la Parte 1 para encontrar los n-gramas destacados en cada tweet de una colección. Tu tarea es implementar la función:</p>
+<p>def find_salient_ngrams(tweets, n, case_sensitive, threshold):</p>
+<p>donde los primeros tres parámetros son los descritos anteriormente y thresholdes elumbral para decidir que un n-gramo es sobresaliente. Esta función debería devolver una lista de conjuntos de n-gramas destacados, un conjunto por tweet.</p>
+<p>Aquí hay un ejemplo de uso de esta función:</p>
+<pre><code>In [68]: tweets = [ {"abridged_text": "the cat in the hat" },
+    ...:            {"abridged_text": "don't let the cat on the hat" },
+    ...:            {"abridged_text": "the cat's hat" },
+    ...:            {"abridged_text": "the hat cat" }]
+    ...:
+In [69]: find_salient_ngrams(tweets, 2, False, 1.3)
+Out[69]:
+[{('cat', 'in'), ('in', 'the')},
+ {('cat', 'on'), ("don't", 'let'), ('let', 'the'), ('on', 'the')},
+ {("cat's", 'hat'), ('the', "cat's")},
+ {('hat', 'cat')}]
+</code></pre>
+<h3>Finalizando</h3>
+<p>Para acabar agrega en la función de analysis las siguientes llamadas a función:</p>
+<p>Los 10 principales hashtags por día (la key es created_at, vas a tener que limpiar para obtener el día)</p>
+<p>Los principales usuarios mencionados por día (que tuvieron al menos 50, 100, 250 y 500 menciones)</p>
+<p>Los principales usuarios mencionados por día (que tuvieron al menos 50, 100, 250 y 500 menciones) de los tweets que fueron favorited (la llave es "favorited")</p>
+<p>Los 10 principales 2-grams y 3-grams por día</p>
+<p>Los 10 principales 2-grams y 3-grams de los tweets que fueron favorited</p>
+<p>Los 10 principales 2-grams y 3-grams que fueron retweeteados más de 25 veces
+(retweeted tiene que ser True y retweet_count mayor a 30</p>
+<p>Los 2-grams y 3-grams salientes con un threshold arriba de .5, 1, 1.5 y 2.5</p>
